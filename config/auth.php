@@ -1,5 +1,7 @@
 <?php
 
+use App\Models\Product\Category;
+
 
 return [
 
@@ -65,7 +67,6 @@ return [
             'driver' => 'eloquent',
             'model' =>  App\Models\Admin\Admin::class
         ],
-
     ],
 
     /*

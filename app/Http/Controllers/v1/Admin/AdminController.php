@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\v1\Admin;
 
 use App\Models\Admin\Admin;
 use Illuminate\Http\Request;
@@ -92,5 +92,4 @@ class AdminController extends Controller
     {
         //
     }
-
 }
