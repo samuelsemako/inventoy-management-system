@@ -5,13 +5,15 @@ namespace App\Models\Admin;
 use App\Models\Setup\SetupTitle;
 use App\Models\Setup\SetupGender;
 use App\Models\Setup\SetupStatus;
-use Illuminate\Database\Eloquent\Model;
 use Laravel\Sanctum\HasApiTokens;
+use Spatie\Permission\Traits\HasRoles;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 
 class Admin extends Authenticatable
 {
     use HasApiTokens;
+    use HasRoles;
+    protected $guard_name = 'admin';
     protected $primaryKey = 'admin_id'; 
     public $incrementing = false; 
     protected $keyType = 'string';

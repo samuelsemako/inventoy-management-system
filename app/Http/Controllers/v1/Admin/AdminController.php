@@ -6,6 +6,7 @@ use App\Models\Admin\Admin;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use App\Models\Setup\SetupCounter;
+use Spatie\Permission\Models\Role;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Resources\Admin\AdminResource;
@@ -17,8 +18,8 @@ class AdminController extends Controller
      */
     public function index()
     {
-         
-        $fetchAllAdmin = Admin:: all();
+
+        $fetchAllAdmin = Admin::all();
         if ($fetchAllAdmin->isEmpty()) {
             return response()->json(
                 [
@@ -31,7 +32,7 @@ class AdminController extends Controller
         return response()->json([
             'success' => true,
             'data' => $fetchAllAdmin,
-           
+
         ], 200);
     }
 
@@ -50,10 +51,11 @@ class AdminController extends Controller
             'titleId' => 'required|int|exists:setup_titles,title_id',
             'genderId' => 'required|int|exists:setup_genders,gender_id',
             'emailAddress' => 'required|string|email|unique:admins,email_address',
+            'roleId' => 'required|int|exists:roles,id',
         ]);
 
-                $adminId = SetupCounter::generateCustomId('ADMIN');
-        Admin::create([
+        $adminId = SetupCounter::generateCustomId('ADMIN');
+        $admin= Admin::create([
             'admin_id' => $adminId,
             'first_name' => strtoupper($request->firstName),
             'middle_name'   => strtoupper($request->middleName),
@@ -65,6 +67,9 @@ class AdminController extends Controller
             'email_address' => strtolower($request->emailAddress),
             'password' => $adminId
         ]);
+         
+        $role = Role::find($request->roleId);// Convert roleId to role name
+        $admin->assignRole($role->name);
 
         return response()->json(
             [
@@ -73,7 +78,6 @@ class AdminController extends Controller
             ],
             201
         );
-
     }
 
     /**
@@ -84,7 +88,7 @@ class AdminController extends Controller
         return new AdminResource(Admin::findorFail($id));
     }
 
-    
+
     /**
      * Update the specified resource in storage.
      */
