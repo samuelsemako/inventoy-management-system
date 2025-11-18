@@ -32,17 +32,7 @@ class CategoryController extends Controller
 
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
+    // Store a newly created resource in storage.
     public function store(Request $request)
     {
         $request ->validate([
@@ -70,24 +60,25 @@ class CategoryController extends Controller
     }
 
     /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-        //
-    }
-
-    /**
      * Update the specified resource in storage.
      */
     public function update(Request $request, string $id)
     {
-        //
+        $updateCategory = Category::findOrFail($id);
+        $request ->validate([
+            'category_name' => 'required|string|unique:categories,category_name,'.$updateCategory->category_id.',category_id',
+        ]); 
+        $updateCategory->update([
+            'category_name' => strtoupper($request->category_name),
+        ]);
+        return response()->json([
+            'success' => true,
+            'message' => 'Category Updated Successfully',
+        ], 200);
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
+    //Remove the specified resource from storage.
+     
     public function destroy(string $id)
     {
         //

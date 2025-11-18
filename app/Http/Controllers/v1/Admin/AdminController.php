@@ -52,7 +52,7 @@ class AdminController extends Controller
             'emailAddress' => 'required|string|email|unique:admins,email_address',
         ]);
 
-                $adminId = SetupCounter::generateCustomId('ADMIN');
+        $adminId = SetupCounter::generateCustomId('ADMIN');
         Admin::create([
             'admin_id' => $adminId,
             'first_name' => strtoupper($request->firstName),
@@ -90,6 +90,36 @@ class AdminController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
-    }
+        $updateAdmin = Admin::findOrFail($id);
+        $request->validate([
+            'firstName'     => ['sometimes', 'required', 'string', 'regex:/^[A-Za-z\s\'-]+$/', 'min:2', 'max:50'],
+            'middleName'    => ['sometimes', 'nullable', 'string', 'regex:/^[A-Za-z\s\'-]+$/', 'min:2', 'max:50'],
+            'lastName'      => ['sometimes', 'required', 'string', 'regex:/^[A-Za-z\s\'-]+$/', 'min:2', 'max:50'],
+            'phoneNumber'   => ['sometimes', 'required', 'string', 'unique:admins,phone_number,' . $updateAdmin->admin_id . ',admin_id', 'regex:/^\+?[1-9]\d{1,14}$/'],
+            'homeAddress'   => 'sometimes|required|string',
+            'titleId'       =>  'sometimes|required|int|exists:setup_titles,title_id', 
+            'genderId'      =>  'sometimes|required|int|exists:setup_genders,gender_id',
+            'emailAddress'  =>  'sometimes|required|string|email|unique:admins,email_address,' . $updateAdmin->admin_id . ',admin_id',
+        ]);
+
+        $updateAdmin->update([
+            'first_name'    => strtoupper($request->firstName) ?? $updateAdmin->first_name,
+            'middle_name'   => strtoupper($request->middleName) ?? $updateAdmin->middle_name,
+            'last_name'     => strtoupper($request->lastName) ?? $updateAdmin->last_name,
+            'phone_number'  => $request->phoneNumber ?? $updateAdmin->phone_number,
+            'home_address'  => $request->homeAddress ?? $updateAdmin->home_address,
+            'title_id'      => $request->titleId ?? $updateAdmin->title_id,
+            'gender_id'     => $request->genderId ?? $updateAdmin->gender_id,
+            'status_id'     => $request->statusId ?? $updateAdmin->status_id,
+            'email_address' => strtolower($request->emailAddress) ?? $updateAdmin->email_address,
+        ]);
+
+        return response()->json(
+            [
+                'success' => true,
+                'message' => 'User Updated Successfully',
+            ],
+            200
+        );
+}
 }
