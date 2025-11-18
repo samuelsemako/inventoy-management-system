@@ -42,7 +42,7 @@ return [
         'admin' => [
             'driver' => 'sanctum',
             'provider' => 'admins',
-        ],
+        ]
     ],
 
     /*
@@ -62,11 +62,11 @@ return [
     |
     */
 
-    'provider' => [
+    'providers' => [
         'admins' => [
             'driver' => 'eloquent',
             'model' =>  App\Models\Admin\Admin::class
-        ],
+        ]
     ],
 
     /*

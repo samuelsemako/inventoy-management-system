@@ -18,7 +18,6 @@ class AdminController extends Controller
      */
     public function index()
     {
-
         $fetchAllAdmin = Admin::all();
         if ($fetchAllAdmin->isEmpty()) {
             return response()->json(
