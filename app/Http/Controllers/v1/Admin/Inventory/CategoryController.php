@@ -2,11 +2,14 @@
 
 namespace App\Http\Controllers\v1\Admin\Inventory;
 
+use App\Models\Admin\Admin;
 use Illuminate\Http\Request;
 use App\Models\Inventory\Category;
 use App\Models\Setup\SetupCounter;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
 use App\Http\Resources\Admin\CategoryResource;
+
 
 class CategoryController extends Controller
 {
@@ -14,7 +17,7 @@ class CategoryController extends Controller
      
     public function index()
     {
-        $fetchAllCategory = Category:: all();
+        $fetchAllCategory = CategoryResource::collection(Category::all());
         if ($fetchAllCategory->isEmpty()) {
             return response()->json(
                 [
@@ -35,6 +38,7 @@ class CategoryController extends Controller
     // Store a newly created resource in storage.
     public function store(Request $request)
     {
+        $admin = Auth::guard('admin')->user();
         $request ->validate([
             'category_name' => 'required|string|unique:categories,category_name',
         ]);
@@ -43,6 +47,7 @@ class CategoryController extends Controller
         Category::create([
             'category_id' => $CategoryId,
             'category_name' => strtoupper($request->category_name),
+            'created_by' => $admin->admin_id,
         ]);
 
         return response()->json([
@@ -64,12 +69,14 @@ class CategoryController extends Controller
      */
     public function update(Request $request, string $id)
     {
+        $admin = Auth::guard('admin')->user();
         $updateCategory = Category::findOrFail($id);
         $request ->validate([
             'category_name' => 'required|string|unique:categories,category_name,'.$updateCategory->category_id.',category_id',
         ]); 
         $updateCategory->update([
             'category_name' => strtoupper($request->category_name),
+            'updated_by' => $admin->admin_id,
         ]);
         return response()->json([
             'success' => true,

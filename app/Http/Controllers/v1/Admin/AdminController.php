@@ -9,6 +9,7 @@ use App\Models\Setup\SetupCounter;
 use Spatie\Permission\Models\Role;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
+use Spatie\Permission\Models\Permission;
 use App\Http\Resources\Admin\AdminResource;
 
 class AdminController extends Controller
@@ -18,8 +19,8 @@ class AdminController extends Controller
      */
     public function index()
     {
-
-        $fetchAllAdmin = Admin::all();
+        $admin = Auth::guard('admin')->user();
+        $fetchAllAdmin = AdminResource::collection(Admin::where('admin_id', '!=', $admin->admin_id)->paginate(50));
         if ($fetchAllAdmin->isEmpty()) {
             return response()->json(
                 [
@@ -32,6 +33,16 @@ class AdminController extends Controller
         return response()->json([
             'success' => true,
             'data' => $fetchAllAdmin,
+            'pagination' => [
+                'total' => $fetchAllAdmin->total(),
+                'perPage' => $fetchAllAdmin->perPage(),
+                'currentPage' => $fetchAllAdmin->currentPage(),
+                'lastPage' => $fetchAllAdmin->lastPage(),
+                'nextPageUrl' => $fetchAllAdmin->nextPageUrl(),
+                'prevPageUrl' => $fetchAllAdmin->previousPageUrl(),
+                'from' => $fetchAllAdmin->firstItem(),
+                'to' => $fetchAllAdmin->lastItem(),
+            ]
 
         ], 200);
     }
@@ -67,8 +78,8 @@ class AdminController extends Controller
             'email_address' => strtolower($request->emailAddress),
             'password' => $adminId
         ]);
-         
-        $role = Role::find($request->roleId);// Convert roleId to role name
+
+        $role = Role::find($request->roleId); // Convert roleId to role name
         $admin->assignRole($role->name);
 
         return response()->json(
@@ -101,22 +112,37 @@ class AdminController extends Controller
             'lastName'      => ['sometimes', 'required', 'string', 'regex:/^[A-Za-z\s\'-]+$/', 'min:2', 'max:50'],
             'phoneNumber'   => ['sometimes', 'required', 'string', 'unique:admins,phone_number,' . $updateAdmin->admin_id . ',admin_id', 'regex:/^\+?[1-9]\d{1,14}$/'],
             'homeAddress'   => 'sometimes|required|string',
-            'titleId'       =>  'sometimes|required|int|exists:setup_titles,title_id', 
+            'titleId'       =>  'sometimes|required|int|exists:setup_titles,title_id',
             'genderId'      =>  'sometimes|required|int|exists:setup_genders,gender_id',
             'emailAddress'  =>  'sometimes|required|string|email|unique:admins,email_address,' . $updateAdmin->admin_id . ',admin_id',
+            'roleId'        =>  'sometimes|required|int|exists:roles,id',
+            'permissionId'   =>  'sometimes|array',
+            'permissionId.*' =>  'int|exists:permissions,id',
         ]);
 
+        $adminId=Auth::guard('admin')->user();
         $updateAdmin->update([
-            'first_name'    => strtoupper($request->firstName) ?? $updateAdmin->first_name,
-            'middle_name'   => strtoupper($request->middleName) ?? $updateAdmin->middle_name,
-            'last_name'     => strtoupper($request->lastName) ?? $updateAdmin->last_name,
-            'phone_number'  => $request->phoneNumber ?? $updateAdmin->phone_number,
-            'home_address'  => $request->homeAddress ?? $updateAdmin->home_address,
-            'title_id'      => $request->titleId ?? $updateAdmin->title_id,
-            'gender_id'     => $request->genderId ?? $updateAdmin->gender_id,
-            'status_id'     => $request->statusId ?? $updateAdmin->status_id,
-            'email_address' => strtolower($request->emailAddress) ?? $updateAdmin->email_address,
+            'first_name'    => strtoupper($request->firstName),
+            'middle_name'   => strtoupper($request->middleName),
+            'last_name'     => strtoupper($request->lastName),
+            'phone_number'  => $request->phoneNumber,
+            'home_address'  => $request->homeAddress,
+            'title_id'      => $request->titleId,
+            'gender_id'     => $request->genderId,
+            'status_id'     => $request->statusId,
+            'email_address' => strtolower($request->emailAddress),
+            'updated_by'    => $adminId->admin_id,
         ]);
+
+        if ($request->has('roleId')) {
+            $role = Role::find($request->roleId);
+            $updateAdmin->syncRoles([$role->name]);
+        }
+
+        if ($request->has('permissionId')) {
+            $permissionNames = Permission::whereIn('id', $request->permissionId)->pluck('name')->toArray();
+            $updateAdmin->syncPermissions($permissionNames); // assigns new, revokes old direct permissions
+        }
 
         return response()->json(
             [
@@ -125,5 +151,5 @@ class AdminController extends Controller
             ],
             200
         );
-}
+    }
 }

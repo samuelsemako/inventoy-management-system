@@ -13,7 +13,6 @@ class Admin extends Authenticatable
 {
     use HasApiTokens;
     use HasRoles;
-    protected $guard_name = 'admin';
     protected $primaryKey = 'admin_id'; 
     public $incrementing = false; 
     protected $keyType = 'string';
@@ -31,7 +30,7 @@ class Admin extends Authenticatable
         'status_id',
         'created_by',
         'updated_by',
-        'last_login_at',
+        'last_login',
         'password'
     ]; 
 

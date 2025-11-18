@@ -15,6 +15,8 @@ return new class extends Migration
             $table->string('category_id')->primary(); 
             $table->string('category_name');
             $table->unsignedBigInteger('status_id')->default(1); //can temporarily be inactive due to maintenance
+            $table->string('created_by');
+            $table->string('updated_by')->nullable();
             $table->timestamps();
         });
     }

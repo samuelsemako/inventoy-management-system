@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Inventory\Supplier;
 use App\Models\Setup\SetupCounter;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
 use App\Http\Resources\Admin\SupplierResource;
 
 class SupplierController extends Controller
@@ -15,7 +16,7 @@ class SupplierController extends Controller
      */
     public function index()
     {
-        $fetchAllSupplier = Supplier:: all();
+        $fetchAllSupplier = SupplierResource::all();
         if ($fetchAllSupplier->isEmpty()) {
             return response()->json(
                 [
@@ -39,6 +40,7 @@ class SupplierController extends Controller
      */
     public function store(Request $request)
     {
+        $admin = Auth::guard('admin')->user();
         $request->validate([
             'supplier_name' => 'required|string|unique:suppliers,supplier_name',
             'email_address' => 'nullable|email',
@@ -53,6 +55,7 @@ class SupplierController extends Controller
             'email_address' => $request->email_address,
             'phone_number' => $request->phone_number,
             'supplier_address' => $request->supplier_address,
+            'created_by' => $admin->admin_id,
         ]);
 
         return response()->json([
@@ -82,6 +85,7 @@ class SupplierController extends Controller
      */
     public function update(Request $request, string $id)
     {
+        $admin = Auth::guard('admin')->user();
         $updateSupplier = Supplier::findOrFail($id);
         $request->validate([
             'supplier_name' => 'required|string|unique:suppliers,supplier_name,'.$updateSupplier->supplier_id.',supplier_id',
@@ -94,6 +98,7 @@ class SupplierController extends Controller
             'email_address' => $request->email_address,
             'phone_number' => $request->phone_number,
             'supplier_address' => $request->supplier_address,
+            'updated_by' => $admin->admin_id,
         ]);
         return response()->json([
             'success' => true,

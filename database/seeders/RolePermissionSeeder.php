@@ -21,11 +21,8 @@ class RolePermissionSeeder extends Seeder
 
         // 2. Create permissions
         $permissions = [
-            'view products',
-            'add products',
-            'edit products',
-            'view sales',
-            'process sales',
+            'manage products',
+            'manage sales',
             'manage admin',
         ];
 
@@ -35,7 +32,7 @@ class RolePermissionSeeder extends Seeder
 
         // 3. Assign permissions to rolesj
         $adminRole->givePermissionTo(Permission::all()); // admin gets all
-        $managerRole->givePermissionTo(['view products', 'add products', 'view sales']);
-        $cashierRole->givePermissionTo(['view products', 'view sales']);
+        $managerRole->givePermissionTo(['manage products', 'manage sales']);
+        $cashierRole->givePermissionTo(['manage sales']);
     }
 }

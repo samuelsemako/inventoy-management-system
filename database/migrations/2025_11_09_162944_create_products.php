@@ -19,6 +19,8 @@ return new class extends Migration
             $table->unsignedBigInteger('stock_quantity');//current quantity available
             $table->string('reordering_level');// when to reorder
             $table->string('supplier_id');
+            $table->string('created_by');
+            $table->string('updated_by')->nullable();
             
 
             $table->foreign('supplier_id')->references('supplier_id')->on('suppliers')->onDelete('restrict')->onUpdate('cascade');

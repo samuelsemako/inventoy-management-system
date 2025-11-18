@@ -2,9 +2,10 @@
 
 namespace App\Models\Inventory;
 
+use App\Models\Admin\Admin;
+use App\Models\Setup\SetupStatus;
 use App\Models\Inventory\Category;
 use App\Models\Inventory\Supplier;
-use App\Models\Setup\SetupStatus;
 use Illuminate\Database\Eloquent\Model;
 
 class Product extends Model
@@ -22,6 +23,7 @@ class Product extends Model
         'cost_price',
         'stock_quantity',
         'supplier_id',
+        'admin_id',
         'created_by',
         'updated_by',
     ];
@@ -35,5 +37,10 @@ class Product extends Model
     public function supplier()
     {
         return $this->belongsTo(Supplier::class, 'supplier_id', 'supplier_id');
+    }
+
+    public function admin()
+    {
+        return $this->belongsTo(Admin::class, 'admin_id', 'admin_id');
     }
 }

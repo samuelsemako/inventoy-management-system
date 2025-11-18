@@ -10,7 +10,7 @@ class Category extends Model
     protected $primaryKey = 'category_id';
     public $incrementing = false;
     protected $keyType = 'string';
-    protected $fillable = ['category_id', 'category_name', 'status_id'];
+    protected $fillable = ['category_id', 'category_name', 'status_id', 'created_by', 'updated_by'];
 
 
     //category relation

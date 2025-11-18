@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Inventory\Product;
 use App\Models\Setup\SetupCounter;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
 
 class ProductController extends Controller
 {
@@ -30,6 +31,7 @@ class ProductController extends Controller
      */
     public function store(Request $request)
     {
+        $admin = Auth::guard('admin')->user();
         $request->validate([
             'product_name' => 'required|string|unique:products,product_name',
             'category_id' => 'required|string|exists:categories,category_id',   
@@ -43,6 +45,7 @@ class ProductController extends Controller
 
 
         $ProductId = SetupCounter::generateCustomId('PROD');
+        $admin = Auth::guard('admin')->user();
         Product::create([
             'product_id' => $ProductId,
             'product_name' => strtoupper($request->product_name),   
@@ -53,6 +56,7 @@ class ProductController extends Controller
             'stock_quantity' => $request->stock_quantity, 
             'reordering_level' => $request->reordering_level,
             'supplier_id' => $request->supplier_id,
+            'created_by' => $admin->admin_id,
         ]);
 
         return response()->json([
@@ -85,11 +89,5 @@ class ProductController extends Controller
         //
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //
-    }
+ 
 }
