@@ -3,7 +3,9 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\v1\Admin\AdminController;
 use App\Http\Controllers\v1\Admin\Auth\AdminAuthController;
+use App\Http\Controllers\v1\Admin\Inventory\ProductController;
 use App\Http\Controllers\v1\Admin\Inventory\CategoryController;
+use App\Http\Controllers\v1\Admin\Inventory\SupplierController;
 
 // Admin(Admin) Routes
 Route::apiResource('v1/admin', AdminController::class);
@@ -15,3 +17,9 @@ Route::middleware('auth:admin')->post('v1/admin/fetch-admin-profile', [AdminAuth
 
 // Admin(Inventory Category) Routes
 Route::apiResource('v1/admin/inventory/category', CategoryController::class);
+
+// Admin(Inventory Supplier) Routes
+Route::apiResource('v1/admin/inventory/supplier', SupplierController::class);
+
+//Admin(Inventory Product) Routes
+Route::apiResource('v1/admin/inventory/product', ProductController::class);
