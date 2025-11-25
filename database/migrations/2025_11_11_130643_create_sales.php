@@ -13,10 +13,9 @@ return new class extends Migration
     {
         Schema::create('sales', function (Blueprint $table) {
             $table->string('sales_id')->primary();
-            $table->string('customer_name')->nullable();
+            $table->string('customer_id')->nullable();
             $table->decimal('total_amount', 10, 2);
             $table->string('sold_by');//reference admin
-            $table->date('sales_date');
             $table->unsignedBigInteger('payment_method_id'); 
             $table->timestamps();
 

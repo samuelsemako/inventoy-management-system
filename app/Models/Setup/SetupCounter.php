@@ -20,6 +20,6 @@ class SetupCounter extends Model
         if ($currentValue < 10) {$no = '00' . $currentValue;} 
         elseif ($currentValue >= 10 && $currentValue < 100) {$no = '0' . $currentValue;}
         else{$no = $currentValue;}
-        return $counterId . $no . date('YmdHis');
+        return $counterId . $no . date('YmdHis') . rand(100000,999999);
     }
 }

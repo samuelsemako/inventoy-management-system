@@ -6,20 +6,29 @@ use App\Http\Controllers\v1\Admin\Auth\AdminAuthController;
 use App\Http\Controllers\v1\Admin\Inventory\ProductController;
 use App\Http\Controllers\v1\Admin\Inventory\CategoryController;
 use App\Http\Controllers\v1\Admin\Inventory\SupplierController;
+use App\Http\Controllers\v1\admin\Sale\SaleController;
+use App\Http\Controllers\v1\admin\User\UserController;
 
-// Admin(Admin) Routes
-Route::apiResource('v1/admin', AdminController::class);
-Route::post('v1/admin/auth/login', [AdminAuthController::class, 'login']);
-Route::post('v1/admin/auth/reset-password', [AdminAuthController::class, 'resetPassword']);
-Route::post('v1/admin/auth/finish-reset-password', [AdminAuthController::class, 'finishPasswordReset']);
-Route::post('v1/admin/auth/resend-otp', [AdminAuthController::class, 'resendOtp']);
-Route::middleware('auth:admin')->post('v1/admin/fetch-admin-profile', [AdminAuthController::class, 'fetchProfile']);
 
-// Admin(Inventory Category) Routes
-Route::apiResource('v1/admin/inventory/category', CategoryController::class);
 
-// Admin(Inventory Supplier) Routes
-Route::apiResource('v1/admin/inventory/supplier', SupplierController::class);
+Route::prefix('v1/')->group(function () {
+    Route::prefix('admin/')->group(function () {
+        Route::post('auth/login', [AdminAuthController::class, 'login']);
+        Route::post('auth/reset-password', [AdminAuthController::class, 'resetPassword']);
+        Route::post('auth/finish-reset-password', [AdminAuthController::class, 'finishPasswordReset']);
+        Route::post('auth/resend-otp', [AdminAuthController::class, 'resendOtp']);
+        
+        Route::middleware('auth:admin')->group(function () {
+            Route::get('auth/fetch-admin-profile', [AdminAuthController::class, 'fetchProfile']);
+            Route::apiResource('products', ProductController::class);
+            Route::apiResource('categories', CategoryController::class);
+            Route::apiResource('suppliers', SupplierController::class);
+            Route::apiResource('admins', AdminController::class);
+            Route::apiResource('sales', SaleController::class);
+            Route::apiResource('users', UserController::class);
+        });
+    });
+});
 
-//Admin(Inventory Product) Routes
-Route::apiResource('v1/admin/inventory/product', ProductController::class);
+
+

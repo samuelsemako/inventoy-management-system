@@ -21,6 +21,7 @@ class Product extends Model
         'selling_price',
         'cost_price',
         'stock_quantity',
+        'reordering_level',
         'supplier_id',
         'created_by',
         'updated_by',

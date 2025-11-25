@@ -14,15 +14,15 @@ class SetupGendersSeeder extends Seeder
     public function run(): void
     {
         $genders = [
-        ['gender_name' =>'MALE'],
-        ['gender_name' =>'FEMALE'],  
+            ['gender_name' => 'MALE'],
+            ['gender_name' => 'FEMALE'],
         ];
 
-        
+
         foreach ($genders as $gender) {
-            SetupGender::firstOrCreate(     
+            SetupGender::firstOrCreate(
                 ['gender_name' => $gender['gender_name']] // Check column
             );
-        }                      
+        }
     }
 }

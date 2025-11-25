@@ -20,7 +20,7 @@ class DatabaseSeeder extends Seeder
         SetupGendersSeeder::class,
         SetupStatusesSeeder::class,
         SetupTitlesSeeder::class,
-        RolePermissionSeeder::class,
+        SetupPaymentSeeder::class,
         ]);
 
     }

@@ -11,8 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('admins', function (Blueprint $table) {
-            $table->string('admin_id')->primary();
+        Schema::create('customers', function (Blueprint $table) {
+            $table->string('customer_id')->primary();
             $table->string('first_name');
             $table->string('middle_name');
             $table->string('last_name');
@@ -28,16 +28,14 @@ return new class extends Migration
             $table->string('updated_by')->nullable();
             $table->timestamp('last_login')->nullable();
             $table->timestamps();
-
-            $table->foreign('title_id')->references('title_id')->on('setup_titles')->onDelete('restrict')->onUpdated('cascade');
-            $table->foreign('status_id')->references('status_id')->on('setup_statuses')->onDelete('restrict')->onUpdated('cascade');
-            $table->foreign('gender_id')->references('gender_id')->on('setup_genders')->onDelete('restrict')->onUpdated('cascade');
         });
     }
-    
-    // Reverse the migrations.
+
+    /**
+     * Reverse the migrations.
+     */
     public function down(): void
     {
-        Schema::dropIfExists('admins');
+        Schema::dropIfExists('customers');
     }
 };

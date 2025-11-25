@@ -11,10 +11,9 @@ use App\Http\Resources\Admin\CategoryResource;
 class CategoryController extends Controller
 {
     //Display a listing of the resource.
-     
     public function index()
     {
-        $fetchAllCategory = Category:: all();
+        $fetchAllCategory = CategoryResource::collection(Category::all());
         if ($fetchAllCategory->isEmpty()) {
             return response()->json(
                 [
@@ -29,7 +28,6 @@ class CategoryController extends Controller
             'data' => $fetchAllCategory,
            
         ], 200);
-
     }
 
     // Store a newly created resource in storage.
@@ -51,17 +49,13 @@ class CategoryController extends Controller
         ], 201);
     }
 
-    /**
-     * Display the specified resource.
-     */
+    // Display the specified resource.
     public function show(string $id)
     {
         return new CategoryResource(Category::findOrFail($id));
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
+    //Update the specified resource in storage.
     public function update(Request $request, string $id)
     {
         $updateCategory = Category::findOrFail($id);
@@ -71,6 +65,7 @@ class CategoryController extends Controller
         $updateCategory->update([
             'category_name' => strtoupper($request->category_name),
         ]);
+        
         return response()->json([
             'success' => true,
             'message' => 'Category Updated Successfully',
@@ -78,7 +73,6 @@ class CategoryController extends Controller
     }
 
     //Remove the specified resource from storage.
-     
     public function destroy(string $id)
     {
         //

@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Cache;
 use App\Http\Resources\Admin\AdminResource;
 
 class AdminAuthController extends Controller
@@ -154,9 +155,19 @@ class AdminAuthController extends Controller
 
     public function fetchProfile(){
         $admin = new AdminResource(Auth::guard('admin')->user());
+        $staffData = Cache::remember("staff_profile_{$admin->admin_id}", now()->addmonth(), function () use ($admin) {
+            return new AdminResource(
+                Admin::with([
+                    'title:title_id,title_name',
+                    'gender:gender_id,gender_name',
+                    'status:status_id,status_name'
+                ])->findOrFail($admin->admin_id)
+            );
+        });
         return response()->json([
             'success' => true,
-            'data' => $admin,
+            'message' => 'Staff profile fetched successfully.',
+            'data' => new AdminResource($staffData),
         ]);
     }
 }

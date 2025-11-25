@@ -2,41 +2,50 @@
 
 namespace App\Http\Controllers\v1\Admin\Inventory;
 
+use App\Models\Admin\Admin;
 use Illuminate\Http\Request;
 use App\Models\Inventory\Product;
 use App\Models\Setup\SetupCounter;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
+use App\Http\Resources\Admin\ProductResource;
 
 class ProductController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
+
+    //   Display a listing of the resource.
     public function index()
     {
-        //
+        $adminFetchAllProduct = ProductResource::collection(Product::all()->cursorPaginate(30));
+        if ($adminFetchAllProduct->isEmpty()) {
+            return response()->json(
+                [
+                    'success' => false,
+                    'message' => 'No Product Found',
+                ],
+                404
+            );
+        }
+        return response()->json([
+            'success' => true,
+            'data' => $adminFetchAllProduct,
+            'next_page_url' => $adminFetchAllProduct->nextPageUrl(),
+        ], 200);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
 
-    /**
-     * Store a newly created resource in storage.
-     */
+
+    // Store a newly created resource in storage.
     public function store(Request $request)
     {
+        $admin = Auth::guard('admin')->user();
         $request->validate([
             'product_name' => 'required|string|unique:products,product_name',
-            'category_id' => 'required|string|exists:categories,category_id',   
+            'category_id' => 'required|string|exists:categories,category_id',
             'product_description' => 'required|string',
             'selling_price' => 'required|integer',
             'cost_price' => 'required|integer',
-            'stock_quantity' => 'required|integer', 
+            'stock_quantity' => 'required|integer',
             'reordering_level' => 'required|integer',
             'supplier_id' => 'required|string|exists:suppliers,supplier_id',
         ]);
@@ -45,14 +54,15 @@ class ProductController extends Controller
         $ProductId = SetupCounter::generateCustomId('PROD');
         Product::create([
             'product_id' => $ProductId,
-            'product_name' => strtoupper($request->product_name),   
+            'product_name' => strtoupper($request->product_name),
             'category_id' => $request->category_id,
             'product_description' => $request->product_description,
             'selling_price' => $request->selling_price,
             'cost_price' => $request->cost_price,
-            'stock_quantity' => $request->stock_quantity, 
+            'stock_quantity' => $request->stock_quantity,
             'reordering_level' => $request->reordering_level,
             'supplier_id' => $request->supplier_id,
+            'created_by' => $admin->admin_id
         ]);
 
         return response()->json([
@@ -66,28 +76,41 @@ class ProductController extends Controller
      */
     public function show(string $id)
     {
-        //
+        return new ProductResource(Product::findOrFail($id));
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(Request $request, string $id)
     {
-        //
+        $admin = Auth::guard('admin')->user();
+        $updateProduct = Product::findOrFail($id);
+        $request->validate([
+            'product_name' => 'required|string|unique:products,product_name,' . $updateProduct->product_id . ',product_id',
+            'category_id' => 'required|string|exists:categories,category_id',
+            'product_description' => 'required|string',
+            'selling_price' => 'required|integer',
+            'cost_price' => 'required|integer',
+            'stock_quantity' => 'required|integer',
+            'reordering_level' => 'required|integer',
+            'supplier_id' => 'required|string|exists:suppliers,supplier_id',
+        ]);
+
+        $updateProduct->update([
+            'product_name' => strtoupper($request->product_name),
+            'category_id' => $request->category_id,
+            'selling_price' => $request->selling_price,
+            'cost_price' => $request->cost_price,
+            'stock_quantity' => $request->stock_quantity,
+            'reordering_level' => $request->reordering_level,
+            'supplier_id' => $request->supplier_id,
+            'updated_by' => $admin->admin_id
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Product Updated Successfully',
+        ], 201);
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(string $id)
     {
         //
