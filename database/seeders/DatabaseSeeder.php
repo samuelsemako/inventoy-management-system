@@ -21,6 +21,7 @@ class DatabaseSeeder extends Seeder
         SetupStatusesSeeder::class,
         SetupTitlesSeeder::class,
         SetupPaymentSeeder::class,
+        RolePermissionSeeder::class
         ]);
 
     }

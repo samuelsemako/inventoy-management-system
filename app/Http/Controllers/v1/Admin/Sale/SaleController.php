@@ -11,16 +11,44 @@ use App\Models\Setup\SetupCounter;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
+use App\Services\Cache\ClearCacheService;
+use App\Http\Resources\admin\SalesResource;
 
 class SaleController extends Controller
 {
 
-    public function index() {
-        $sales = Sale::with(['items'])->get();
-        return response()->json([
-            'success' => true,
-            'data' => $sales
-        ], 200);
+    public function index(Request $request)
+    {
+        $cursor = $request->get('Cursor', 'frstPage');
+        $cacheKey = "sales_list{$cursor}";
+
+        $posts =  Cache::tags('sales_list')->flexible($cacheKey, [now()->addmonth(), null], function () {
+            return Sale::with([
+                'customer:customer_id,first_name,middle_name,last_name',
+                'payment_method:payment_method_id,payment_method_name',
+                'seller:admin_id,first_name,middle_name,last_name'
+            ])->cursorPaginate(1);
+        });
+
+        if ($posts->isEmpty()) {
+            return response()->json(
+                [
+                    'success'  => false,
+                    'message' => 'No record found'
+                ],
+                404
+            );
+        }
+        return response()->json(
+            [
+                'success' => true,
+                'data' => SalesResource::collection($posts),
+                'pagination' => [
+                    'nextPageUrl' => $posts->nextPageUrl(),
+                ]
+            ],
+        );
     }
 
     public function store(Request $request)
@@ -35,7 +63,6 @@ class SaleController extends Controller
         try {
             $admin = Auth::guard('admin')->user();
             DB::transaction(function () use ($request, $admin) {
-
                 $saleId = SetupCounter::generateCustomId('SALE');
                 $sale = Sale::create([
                     'sales_id' => $saleId,
@@ -58,17 +85,11 @@ class SaleController extends Controller
                     $product = $products[$item['product_id']] ?? null;
 
                     if (!$product) {
-                        return response()->json([
-                            'status' => false,
-                            'message' => "Product not found"
-                        ], 404);
+                        throw new \Exception("Product not found: {$item['product_id']}");
                     }
 
                     if ($product->stock_quantity < $item['quantity']) {
-                        return response()->json([
-                            'status' => false,
-                            'message' => "Not enough stock for product: {$product->product_name}"
-                        ], 400);
+                       throw new \Exception("Not enough stock for product: {$product->product_name}");
                     }
 
 
@@ -88,7 +109,7 @@ class SaleController extends Controller
                     $newStock = $product->stock_quantity - $item['quantity'];
                     $product->decrement('stock_quantity', $item['quantity']);
 
-                    $alertId=SetupCounter::generateCustomId('ALAT');
+                    $alertId = SetupCounter::generateCustomId('ALAT');
                     if ($newStock <= $product->reordering_level) {
                         Alert::create([
                             'alert_id' => $alertId,
@@ -103,7 +124,7 @@ class SaleController extends Controller
                 SalesItem::insert($salesItems);
                 $sale->update(['total_amount' => $totalAmount]);
             });
-
+            ClearCacheService::clearListCache('sales_list');
             return response()->json([
                 'success' => true,
                 'message' => 'Sale recorded successfully',
@@ -118,11 +139,29 @@ class SaleController extends Controller
         }
     }
 
-
-
     public function show(string $id)
     {
-        //
+        $salesInfo = Cache::remember("sales_info_{$id}", now()->addmonth(), function () use ($id) {
+            return new SalesResource(
+                Sale::with([
+                    'customer:customer_id,first_name,middle_name,last_name',
+                    'payment_method:payment_method_id,payment_method_name',
+                    'seller:admin_id,first_name,middle_name,last_name'
+                ])->findOrFail($id)
+            );
+        });
+
+        if ($salesInfo === null) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Sale not found'
+            ], 404);
+        }
+
+        return response()->json([
+            'status' => true,
+            'data' => new SalesResource($salesInfo)
+        ]);
     }
 
     public function update(Request $request, string $id)

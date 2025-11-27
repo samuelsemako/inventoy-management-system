@@ -7,18 +7,28 @@ use Illuminate\Foundation\Http\Middleware\TrimStrings;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
-        api: __DIR__.'/../routes/api.php',
-        commands: __DIR__.'/../routes/console.php',
+        api: __DIR__ . '/../routes/api.php',
+        commands: __DIR__ . '/../routes/console.php',
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        $middleware->use([
-            TrimStrings::class,
+        $middleware->use([TrimStrings::class,]);
+        $middleware->api([
+            \App\Http\Middleware\ForceJsonResponse::class,
+            \App\Http\Middleware\GlobalApiKey::class
         ]);
-        
-        $middleware->api(\App\Http\Middleware\ForceJsonResponse::class);
-        $middleware->api(\App\Http\Middleware\GlobalApiKey::class);
+
+        $middleware->alias([
+            'role' => \Spatie\Permission\Middleware\RoleMiddleware::class,
+            'permission' => \Spatie\Permission\Middleware\PermissionMiddleware::class,
+            'role_or_permission' => \Spatie\Permission\Middleware\RoleOrPermissionMiddleware::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        //
+        $exceptions->render(function (\Spatie\Permission\Exceptions\UnauthorizedException $e, $request) {
+            return response()->json([
+                'responseMessage' => 'You do not have the required authorization.',
+                'responseStatus'  => 403,
+            ]);
+        });
     })->create();

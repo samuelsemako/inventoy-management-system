@@ -6,11 +6,12 @@ use App\Models\Admin\Admin;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use App\Models\Setup\SetupCounter;
+use Spatie\Permission\Models\Role;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
-use App\Http\Resources\Admin\AdminResource;
 use App\Services\Cache\ClearCacheService;
+use App\Http\Resources\Admin\AdminResource;
 
 class AdminController extends Controller
 {
@@ -67,10 +68,11 @@ class AdminController extends Controller
             'titleId' => 'required|int|exists:setup_titles,title_id',
             'genderId' => 'required|int|exists:setup_genders,gender_id',
             'emailAddress' => 'required|string|email|unique:admins,email_address',
+            'roleId' => 'required|int|exists:roles,id',
         ]);
 
         $adminId = SetupCounter::generateCustomId('ADMIN');
-        Admin::create([
+        $staff = Admin::create([
             'admin_id' => $adminId,
             'first_name' => strtoupper($request->firstName),
             'middle_name'   => strtoupper($request->middleName),
@@ -83,6 +85,8 @@ class AdminController extends Controller
             'password' => $adminId,
             'created_by' => $admin->admin_id,
         ]);
+        $role = Role::findById($request->roleId, 'admin'); 
+        $staff->assignRole($role);
 
         ClearCacheService::clearListCache('staff_list');
         return response()->json(

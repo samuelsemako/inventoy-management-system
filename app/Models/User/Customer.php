@@ -35,19 +35,4 @@ class Customer extends Authenticatable
 
     protected $hidden = ['password'];
     protected $casts = ['password' => 'hashed',];
-
-    public function status()
-    {
-        return $this->belongsTo(SetupStatus::class, 'status_id', 'status_id');
-    }
-
-    public function gender()
-    {
-        return $this->belongsTo(SetupGender::class, 'gender_id', 'gender_id');
-    }
-
-    public function title()
-    {
-        return $this->belongsTo(SetupTitle::class, 'title_id', 'title_id');
-    }
 }

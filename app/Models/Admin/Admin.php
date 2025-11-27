@@ -2,16 +2,13 @@
 
 namespace App\Models\Admin;
 
-use App\Models\Setup\SetupTitle;
-use App\Models\Setup\SetupGender;
-use App\Models\Setup\SetupStatus;
-use Illuminate\Database\Eloquent\Model;
 use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Spatie\Permission\Traits\HasRoles;
 
 class Admin extends Authenticatable
 {
-    use HasApiTokens;
+    use HasApiTokens,HasRoles;
     protected $primaryKey = 'admin_id'; 
     public $incrementing = false; 
     protected $keyType = 'string';
@@ -35,19 +32,5 @@ class Admin extends Authenticatable
 
     protected $hidden = ['password'];
     protected $casts = ['password' => 'hashed',];
-
-    // public function status()
-    // {
-    //     return $this->belongsTo(SetupStatus::class, 'status_id', 'status_id');
-    // }
-
-    // public function gender()
-    // {
-    //     return $this->belongsTo(SetupGender::class, 'gender_id', 'gender_id');
-    // }
-
-    // public function title()
-    // {
-    //     return $this->belongsTo(SetupTitle::class, 'title_id', 'title_id');
-    // }
+    
 }
