@@ -60,7 +60,7 @@ class CategoryController extends Controller
     {
         $updateCategory = Category::findOrFail($id);
         $request ->validate([
-            'category_name' => 'required|string|unique:categories,category_name,'.$updateCategory->category_id.',category_id',
+            'category_name' => 'sometimes|string|unique:categories,category_name,'.$updateCategory->category_id.',category_id',
         ]); 
         $updateCategory->update([
             'category_name' => strtoupper($request->category_name),

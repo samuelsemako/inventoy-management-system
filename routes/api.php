@@ -5,7 +5,9 @@ use App\Http\Controllers\v1\admin\RoleController;
 use App\Http\Controllers\v1\Admin\AdminController;
 use App\Http\Controllers\v1\admin\Sale\SaleController;
 use App\Http\Controllers\v1\admin\User\UserController;
+use App\Http\Controllers\v1\Admin\User\UserAuthController;
 use App\Http\Controllers\v1\Admin\Auth\AdminAuthController;
+use App\Http\Controllers\v1\Admin\StaffPermissionController;
 use App\Http\Controllers\v1\Admin\Inventory\ProductController;
 use App\Http\Controllers\v1\Admin\Inventory\CategoryController;
 use App\Http\Controllers\v1\Admin\Inventory\SupplierController;
@@ -27,7 +29,18 @@ Route::prefix('v1/')->group(function () {
             Route::apiResource('staffs', AdminController::class);
             Route::apiResource('sales', SaleController::class);
             Route::apiResource('users', UserController::class);
-            Route::apiResource('roles', RoleController::class)->middleware('permission:manage staffs');
+            Route::apiResource('roles', RoleController::class)->middleware('permission:manage roles');
+            // Route::post('staffs/{staffId}/direct-permissions', [StaffPermissionController::class, 'assignDirectPermissions'])
+            // ->middleware('permission:manage role');
+            Route::post('staffs/{staffId}/direct-permissions', [StaffPermissionController::class, 'assignDirectPermissions'])
+            ->middleware('permission:manage roles');
+            Route::delete('staffs/{staffId}/direct-permissions', [StaffPermissionController::class, 'revokeDirectPermissions'])
+            ->middleware('permission:manage roles');
         });
+    });
+
+    Route::prefix('user/')->group(function () {
+        Route::post('auth/login', [UserAuthController::class, 'login']);
+    
     });
 });

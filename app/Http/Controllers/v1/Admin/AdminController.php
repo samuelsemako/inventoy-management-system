@@ -85,8 +85,8 @@ class AdminController extends Controller
             'password' => $adminId,
             'created_by' => $admin->admin_id,
         ]);
-        $role = Role::findById($request->roleId, 'admin'); 
-        $staff->assignRole($role);
+         $role = Role::findById($request->roleId, 'admin'); 
+         $staff->assignRole($role);
 
         ClearCacheService::clearListCache('staff_list');
         return response()->json(
