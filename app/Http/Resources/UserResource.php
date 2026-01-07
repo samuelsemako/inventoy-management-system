@@ -1,22 +1,21 @@
 <?php
 
-namespace App\Http\Resources\Admin;
+namespace App\Http\Resources;
 
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class AdminResource extends JsonResource
+class UserResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
      *
      * @return array<string, mixed>
      */
-    public function toArray(Request $request): array
+     public function toArray(Request $request): array
     {
         return [
-            'adminId' => $this->admin_id,
+            'customerId' => $this->customer_id,
             'firstName' => $this->first_name,
             'middleName' => $this->middle_name,
             'lastName' => $this->last_name,
@@ -31,15 +30,10 @@ class AdminResource extends JsonResource
                 'titleId' => $this->title_id,
                 'titleName' => $this->title?->title_name
             ],
-            'status' => [
+             'status' => [
                 'statusId' => $this->status_id,
                 'statusName' => $this->status?->status_name
-            ],
-
-            'passportUrl' => $this->passport ? Storage::url("passports/admin/{$this->passport}")
-                : null,
-            'createdAt' => $this->created_at->format('d M Y, h:i A'),
-
+            ]
         ];
     }
 }

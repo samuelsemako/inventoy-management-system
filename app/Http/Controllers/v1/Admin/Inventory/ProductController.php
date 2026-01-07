@@ -84,14 +84,14 @@ class ProductController extends Controller
         $admin = Auth::guard('admin')->user();
         $updateProduct = Product::findOrFail($id);
         $request->validate([
-            'product_name' => 'required|string|unique:products,product_name,' . $updateProduct->product_id . ',product_id',
-            'category_id' => 'required|string|exists:categories,category_id',
-            'product_description' => 'required|string',
-            'selling_price' => 'required|integer',
-            'cost_price' => 'required|integer',
-            'stock_quantity' => 'required|integer',
-            'reordering_level' => 'required|integer',
-            'supplier_id' => 'required|string|exists:suppliers,supplier_id',
+            'product_name' => 'sometimes|string|unique:products,product_name,' . $updateProduct->product_id . ',product_id',
+            'category_id' => 'sometimes|string|exists:categories,category_id',
+            'product_description' => 'sometimes|string',
+            'selling_price' => 'sometimes|integer',
+            'cost_price' => 'sometimes|integer',
+            'stock_quantity' => 'sometimes|integer',
+            'reordering_level' => 'sometimes|integer',
+            'supplier_id' => 'sometimes|string|exists:suppliers,supplier_id',
         ]);
 
         $updateProduct->update([

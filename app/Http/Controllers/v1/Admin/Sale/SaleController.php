@@ -23,7 +23,7 @@ class SaleController extends Controller
         $cursor = $request->get('Cursor', 'frstPage');
         $cacheKey = "sales_list{$cursor}";
 
-        $posts =  Cache::tags('sales_list')->flexible($cacheKey, [now()->addmonth(), null], function () {
+        $posts =  Cache::tags('sales_list')->flexible($cacheKey, [now()->addmonth(), null], function () { 
             return Sale::with([
                 'customer:customer_id,first_name,middle_name,last_name',
                 'payment_method:payment_method_id,payment_method_name',

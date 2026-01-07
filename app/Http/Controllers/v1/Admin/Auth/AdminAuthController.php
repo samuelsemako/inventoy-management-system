@@ -28,12 +28,12 @@ class AdminAuthController extends Controller
                 'message' => 'Account is suspended! Contact Admin for help.',
             ], 403);
         }
-        
+
         if ($admin && Hash::check($request->password, $admin->password)) {
             $expiresAt = now()->addDay(1); // Token expires in 1 day
             $admin->tokens()->delete(); // Invalidate previous tokens
-            $token = $admin->createToken('auth_token')->plainTextToken;// Create new token
-            $admin->tokens()->latest()->first()->update(['expires_at' => $expiresAt]);// Set expiration time
+            $token = $admin->createToken('auth_token')->plainTextToken; // Create new token
+            $admin->tokens()->latest()->first()->update(['expires_at' => $expiresAt]); // Set expiration time
 
             $admin->update(['last_login' => now()]);
 
@@ -41,7 +41,7 @@ class AdminAuthController extends Controller
                 'success' => true,
                 'message' => 'Login successfully',
                 'token' => $token,
-                ], 200);
+            ], 200);
         } else {
             return response()->json([
                 'success' => false,
@@ -56,10 +56,10 @@ class AdminAuthController extends Controller
             'emailAddress' => 'required|email',
         ]);
         $admin = Admin::where('email_address', $request->emailAddress)->first();
-       
-        if ($admin){
-           $otp = rand(100000, 999999);      
-           $expiresAt = now()->addMinutes(10); // expires in 5 minutes
+
+        if ($admin) {
+            $otp = rand(100000, 999999);
+            $expiresAt = now()->addMinutes(10); // expires in 5 minutes
             DB::table('reset_password_tokens')->updateOrInsert(
                 ['id' => $admin->admin_id],
                 [
@@ -75,7 +75,6 @@ class AdminAuthController extends Controller
                 'otp' => $otp,
                 'expires_at' => $expiresAt,
             ], 200);
-
         } else {
             return response()->json([
                 'success' => false,
@@ -83,7 +82,6 @@ class AdminAuthController extends Controller
 
             ], 404);
         }
-
     }
 
     public function finishPasswordReset(Request $request)
@@ -91,7 +89,7 @@ class AdminAuthController extends Controller
         $request->validate([
             'adminId' => 'required|string',
             'otp' => 'required|integer',
-            'newPassword' => 'required|string|min:8|confirmed', 
+            'newPassword' => 'required|string|min:8|confirmed',
         ]);
 
         $admin = Admin::where('admin_id', $request->adminId)->first();
@@ -133,7 +131,7 @@ class AdminAuthController extends Controller
         $admin = Admin::where('admin_id', $request->adminId)->first();
 
         if ($admin) {
-            $otp = rand(100000, 999999); 
+            $otp = rand(100000, 999999);
             $expiresAt = now()->addMinutes(10); // expires in 10 minutes
 
             DB::table('reset_password_tokens')->updateOrInsert(
@@ -153,7 +151,8 @@ class AdminAuthController extends Controller
         }
     }
 
-    public function fetchProfile(){
+    public function fetchProfile()
+    {
         $admin = new AdminResource(Auth::guard('admin')->user());
         $staffData = Cache::remember("staff_profile_{$admin->admin_id}", now()->addmonth(), function () use ($admin) {
             return new AdminResource(

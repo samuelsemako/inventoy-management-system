@@ -26,7 +26,7 @@ class UserController extends Controller
 
     public function store(Request $request)
     {
-        $user = Auth::guard('admin')->user();
+        $user = Auth::guard('user')->user();
         $request->validate([
             'firstName'     => ['required', 'string', 'regex:/^[A-Za-z\s\'-]+$/', 'min:2', 'max:50'],
             'middleName'    => ['nullable', 'string', 'regex:/^[A-Za-z\s\'-]+$/', 'min:2', 'max:50'],
